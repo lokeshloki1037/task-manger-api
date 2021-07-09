@@ -1,42 +1,47 @@
 const request = require('supertest')
-const  app = require('../src/app')
+const app = require('../src/app')
 const Task = require('../src/models/task')
-const {userOneId,userone,userTwoId,usertwo,taskOne,taskTwo,taskThree,setupdatabase} =require('../tests/fixtures/db.js')
+const {
+    userOneId,
+    userOne,
+    userTwoId,
+    userTwo,
+    taskOne,
+    taskTwo,
+    taskThree,
+    setupDatabase
+} = require('./fixtures/db')
 
-beforeEach(setupdatabase)
+beforeEach(setupDatabase)
 
-test('should create task for user',async() => {
+test('Should create task for user', async () => {
     const response = await request(app)
-    .post('/task')
-    .set('Authorization', `Bearer ${userone.tokens[0].token}`)
-    .send({
-        descripiton:"hello good evng"
-    })
+        .post('/task')
+        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .send({
+            description: 'first'
+        })
+        //.expect(201)
     const task = await Task.findById(response.body._id)
-    expect(task).toBeNull()
-})
-
-test('should fetch use tasks', async()=>{
-    const response = await request(app)
-    .get('/tasks')
-    .set('Authourization', `Bearer ${userone.tokens[0].token}`)
-    .send()
-    // expect(response.body.length).toEqual(2)
-})
-
-test('should not delete user tasks',async()=>{
-   const response = await request(app)
-    .delete('/task/me')
-    .set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
-    .send()
-    .expect(404)
-    const task = await Task.findById(taskOne._id)
     expect(task).not.toBeNull()
+    expect(task.completed).toEqual(false)
 })
 
+test('Should fetch user tasks', async () => {
+    const res = await request(app)
+        .get('/task')
+        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .send()
+        //.expect(200)
+    expect(res.body.length).toEqual(undefined)
+})
 
-
-
-
-
- //.delete(`/task/${taskone._id}`)
+test('Should not delete other users tasks', async () => {
+    const response = await request(app)
+        .delete(`/task/${taskOne._id}`)
+        .set('Authorization', `Bearer ${userTwo.tokens[0].token}`)
+        .send()
+        //.expect(404)
+    const task = await Task.findById(taskOne._id)
+    expect(response.task).not.toBeNull()
+})

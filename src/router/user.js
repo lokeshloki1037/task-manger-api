@@ -16,8 +16,7 @@ router.post('/user' , async (request , response) => {
      response.send({user,token}).status(201)
   }catch(err){
   response.status(400).send(err)
-  }
-      
+  }    
 });
 
 router.post('/user/login', async (req,res) => {
@@ -73,7 +72,7 @@ router.patch('/user/me',auth, async (req,res)=>{
     await req.user.save();
   res.send(req.user)
   }catch(e){
-      res.status(400).send(e);
+      res.status(400).send(e)
   }
 })
 
